@@ -80,14 +80,14 @@ yarn start
 
 ```
 app/
-├── (tabs)/               # Tabbed navigation (home, profile, favorites)
-│   ├── index.tsx         # List of maintenances
-│   ├── profile.tsx       # User profile view & edit
-│   └── favorites.tsx     # Favorite items
-├── login.tsx             # Authentication screen
-├── create-maintenance.tsx# Create new maintenance
-├── maintenance-details.tsx # Detail and delete
-├── edit-maintenance.tsx  # Edit existing record
+├── (tabs)/                  # Tabbed navigation (home, profile, favorites)
+│   ├── index.tsx            # List of maintenances
+│   ├── profile.tsx          # User profile view & edit
+│   └── favorites.tsx        # Favorite items
+├── login.tsx                # Authentication screen
+├── create-maintenance.tsx   # Create new maintenance
+├── maintenance-details.tsx  # Detail and delete
+├── edit-maintenance.tsx     # Edit existing record
 ```
 
 
