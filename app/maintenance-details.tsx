@@ -19,34 +19,33 @@ export default function MaintenanceDetailsScreen() {
   const router = useRouter()
   const { title, date, km, description, location, cost, id } = useLocalSearchParams()
 
-function handleDelete() {
-  Alert.alert(
-    'Confirmar exclusão',
-    'Tem certeza que deseja excluir esta manutenção?',
-    [
-      { text: 'Cancelar', style: 'cancel' },
-      {
-        text: 'Excluir',
-        style: 'destructive',
-        onPress: async () => {
-          const { error } = await supabase
-            .from('maintenances')
-            .delete()
-            .eq('id', id as string)
+  function handleDelete() {
+    Alert.alert(
+      'Confirmar exclusão',
+      'Tem certeza que deseja excluir esta manutenção?',
+      [
+        { text: 'Cancelar', style: 'cancel' },
+        {
+          text: 'Excluir',
+          style: 'destructive',
+          onPress: async () => {
+            const { error } = await supabase
+              .from('maintenances')
+              .delete()
+              .eq('id', id as string)
 
-          if (error) {
-            Alert.alert('Erro', 'Não foi possível excluir a manutenção.')
-          } else {
-            Alert.alert('Sucesso', 'Manutenção excluída com sucesso.')
-            router.back()
-          }
+            if (error) {
+              Alert.alert('Erro', 'Não foi possível excluir a manutenção.')
+            } else {
+              Alert.alert('Sucesso', 'Manutenção excluída com sucesso.')
+              router.back()
+            }
+          },
         },
-      },
-    ],
-    { cancelable: true }
-  )
-}
-
+      ],
+      { cancelable: true }
+    )
+  }
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: '#F9FAFB' }}>
@@ -68,6 +67,14 @@ function handleDelete() {
           <DetailRow icon="location" label="Local" value={location as string || 'N/A'} />
           <DetailRow icon="cash" label="Custo" value={cost ? `R$ ${cost}` : 'N/A'} />
         </View>
+
+        <TouchableOpacity
+          style={[styles.editButton]}
+          onPress={() => router.push(`/edit-maintenance?id=${id}`)}
+        >
+          <Ionicons name="create" size={20} color="#fff" style={{ marginRight: 8 }} />
+          <Text style={styles.editButtonText}>Editar manutenção</Text>
+        </TouchableOpacity>
 
         <TouchableOpacity style={styles.deleteButton} onPress={handleDelete}>
           <Ionicons name="trash" size={20} color="#fff" style={{ marginRight: 8 }} />
@@ -137,8 +144,23 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: '#222',
   },
+  editButton: {
+    marginTop: 24,
+    marginHorizontal: 20,
+    backgroundColor: '#007AFF',
+    paddingVertical: 14,
+    borderRadius: 12,
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  editButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: '600',
+  },
   deleteButton: {
-    marginTop: 32,
+    marginTop: 16,
     marginHorizontal: 20,
     backgroundColor: '#FF3B30',
     paddingVertical: 14,

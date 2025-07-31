@@ -54,9 +54,12 @@ function RootLayoutNav() {
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
         <Stack.Screen name="modal" options={{ presentation: 'modal' }} />
         <Stack.Screen name="maintenance-details" options={{ headerShown: false }} />
+        <Stack.Screen name="create-maintenance" options={{ headerShown: false }} />
+        <Stack.Screen name="edit-maintenance" options={{ headerShown: false }} />
       </Stack>
     </ThemeProvider>
   );
 }
+
 
 
