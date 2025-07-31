@@ -44,16 +44,19 @@ export default function RootLayout() {
 
   return <RootLayoutNav />;
 }
-
 function RootLayoutNav() {
   const colorScheme = useColorScheme();
 
   return (
     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <Stack>
+      <Stack initialRouteName="login">
+        <Stack.Screen name="login" options={{ headerShown: false }} />
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
         <Stack.Screen name="modal" options={{ presentation: 'modal' }} />
+        <Stack.Screen name="maintenance-details" options={{ headerShown: false }} />
       </Stack>
     </ThemeProvider>
   );
 }
+
+
