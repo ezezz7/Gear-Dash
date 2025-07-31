@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import {
   View,
   Text,
@@ -16,8 +16,6 @@ import { useRouter } from 'expo-router'
 import { supabase } from '@/lib/supabase'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useFocusEffect } from '@react-navigation/native'
-import { useCallback } from 'react'
-
 
 function formatDateBR(dateString: string): string {
   const [year, month, day] = dateString.split('-')
@@ -29,43 +27,53 @@ export default function MaintenanceList() {
   const [maintenances, setMaintenances] = useState<any[]>([])
   const [favorites, setFavorites] = useState<string[]>([])
   const [search, setSearch] = useState('')
+  const [isAdmin, setIsAdmin] = useState(false)
   const insets = useSafeAreaInsets()
 
   useFocusEffect(
-  useCallback(() => {
-    const fetchData = async () => {
-      const { data: userData } = await supabase.auth.getUser()
-      const userId = userData?.user?.id
+    useCallback(() => {
+      const fetchData = async () => {
+        const { data: userData } = await supabase.auth.getUser()
+        const userId = userData?.user?.id
 
-      if (!userId) {
-        Alert.alert('Erro', 'Usuário não autenticado.')
-        return
+        if (!userId) {
+          Alert.alert('Erro', 'Usuário não autenticado.')
+          return
+        }
+
+        // Verifica se o usuário é admin
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('role')
+          .eq('id', userId)
+          .single()
+
+        setIsAdmin(profile?.role === 'admin')
+
+        // Carrega manutenções
+        const { data: maints, error: maintError } = await supabase
+          .from('maintenances')
+          .select('*')
+          .eq('user_id', userId)
+          .order('date', { ascending: false })
+
+        const { data: favs, error: favError } = await supabase
+          .from('favorites')
+          .select('maintenance_id')
+          .eq('user_id', userId)
+
+        if (maintError || favError) {
+          Alert.alert('Erro', 'Erro ao carregar manutenções ou favoritos')
+          return
+        }
+
+        setMaintenances(maints || [])
+        setFavorites((favs || []).map(f => f.maintenance_id))
       }
 
-      const { data: maints, error: maintError } = await supabase
-        .from('maintenances')
-        .select('*')
-        .eq('user_id', userId)
-        .order('date', { ascending: false })
-
-      const { data: favs, error: favError } = await supabase
-        .from('favorites')
-        .select('maintenance_id')
-        .eq('user_id', userId)
-
-      if (maintError || favError) {
-        Alert.alert('Erro', 'Erro ao carregar manutenções ou favoritos')
-        return
-      }
-
-      setMaintenances(maints || [])
-      setFavorites((favs || []).map(f => f.maintenance_id))
-    }
-
-    fetchData()
-  }, [])
-)
-
+      fetchData()
+    }, [])
+  )
 
   async function toggleFavorite(maintenanceId: string) {
     const { data: userData } = await supabase.auth.getUser()
@@ -107,6 +115,12 @@ export default function MaintenanceList() {
 
         <Text style={styles.title}>Suas Manutenções</Text>
 
+        {isAdmin && (
+          <TouchableOpacity onPress={() => Alert.alert('Acesso Admin')}>
+            <Text style={styles.adminLabel}>[Admin] Gerenciar sistema</Text>
+          </TouchableOpacity>
+        )}
+
         <TextInput
           style={styles.searchInput}
           placeholder="Buscar manutenção..."
@@ -129,7 +143,7 @@ export default function MaintenanceList() {
                 router.push({
                   pathname: '/maintenance-details',
                   params: {
-                    id: item.id, // ✅ adicionado ID
+                    id: item.id,
                     title: item.title,
                     date: item.date,
                     km: item.mileage.toString(),
@@ -180,6 +194,12 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#fff',
     marginBottom: 12,
+  },
+  adminLabel: {
+    color: '#fff',
+    fontWeight: 'bold',
+    fontSize: 16,
+    marginBottom: 8,
   },
   searchInput: {
     backgroundColor: 'rgba(255,255,255,0.2)',

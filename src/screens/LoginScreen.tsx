@@ -21,17 +21,36 @@ export default function LoginScreen() {
   const router = useRouter()
 
   async function handleLogin() {
-    const { data, error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    })
+  const { data, error } = await supabase.auth.signInWithPassword({
+    email,
+    password,
+  })
 
-    if (error) {
-      Alert.alert('Erro ao entrar', error.message)
-    } else {
-      router.replace('/')
+  if (error) {
+    Alert.alert('Erro ao entrar', error.message)
+  } else {
+    const { data: userData } = await supabase.auth.getUser()
+    const userId = userData?.user?.id
+
+    if (userId) {
+      const { data: existingProfile } = await supabase
+        .from('profiles')
+        .select('id')
+        .eq('id', userId)
+        .single()
+
+      if (!existingProfile) {
+        await supabase.from('profiles').insert({
+          id: userId,
+          role: 'user',
+        })
+      }
     }
+
+    router.replace('/')
   }
+}
+
 
   return (
     <LinearGradient

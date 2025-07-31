@@ -7,6 +7,7 @@ import { useRouter } from 'expo-router'
 
 export default function ProfileScreen() {
   const [user, setUser] = useState<any>(null)
+  const [role, setRole] = useState<string>('user')
   const router = useRouter()
 
   useEffect(() => {
@@ -17,6 +18,14 @@ export default function ProfileScreen() {
 
       if (user) {
         setUser(user)
+
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('role')
+          .eq('id', user.id)
+          .single()
+
+        setRole(profile?.role ?? 'user')
       }
     }
 
@@ -54,7 +63,9 @@ export default function ProfileScreen() {
         <View style={styles.row}>
           <Ionicons name="person" size={20} color="#FF7A00" style={styles.icon} />
           <Text style={styles.label}>Tipo:</Text>
-          <Text style={styles.value}>Usuário comum</Text>
+          <Text style={styles.value}>
+            {role === 'admin' ? 'Administrador' : 'Usuário comum'}
+          </Text>
         </View>
       </View>
 
@@ -76,7 +87,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     borderBottomLeftRadius: 24,
     borderBottomRightRadius: 24,
-    marginTop:27
+    marginTop: 27,
   },
   headerText: {
     color: '#fff',
