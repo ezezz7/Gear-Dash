@@ -3,6 +3,8 @@ import { useState } from 'react'
 import { supabase } from '@/lib/supabase'
 import { useRouter } from 'expo-router'
 
+
+
 function formatDateToISO(input: string): string {
   const [day, month, year] = input.split('/')
   return `${year}-${month}-${day}`

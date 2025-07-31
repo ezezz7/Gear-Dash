@@ -8,12 +8,16 @@ import {
   Alert,
   StatusBar,
   SafeAreaView,
+  TextInput,
 } from 'react-native'
 import { LinearGradient } from 'expo-linear-gradient'
 import { Ionicons } from '@expo/vector-icons'
 import { useRouter } from 'expo-router'
 import { supabase } from '@/lib/supabase'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import { useFocusEffect } from '@react-navigation/native'
+import { useCallback } from 'react'
+
 
 function formatDateBR(dateString: string): string {
   const [year, month, day] = dateString.split('-')
@@ -24,9 +28,11 @@ export default function MaintenanceList() {
   const router = useRouter()
   const [maintenances, setMaintenances] = useState<any[]>([])
   const [favorites, setFavorites] = useState<string[]>([])
+  const [search, setSearch] = useState('')
   const insets = useSafeAreaInsets()
 
-  useEffect(() => {
+  useFocusEffect(
+  useCallback(() => {
     const fetchData = async () => {
       const { data: userData } = await supabase.auth.getUser()
       const userId = userData?.user?.id
@@ -58,6 +64,8 @@ export default function MaintenanceList() {
 
     fetchData()
   }, [])
+)
+
 
   async function toggleFavorite(maintenanceId: string) {
     const { data: userData } = await supabase.auth.getUser()
@@ -88,15 +96,27 @@ export default function MaintenanceList() {
     }
   }
 
+  const filteredMaintenances = maintenances.filter(item =>
+    item.title.toLowerCase().includes(search.toLowerCase())
+  )
+
   return (
     <LinearGradient colors={['#FF7B00', '#FFB347']} style={styles.gradient}>
       <SafeAreaView style={[styles.container, { paddingTop: insets.top + 36 }]}>
         <StatusBar barStyle="dark-content" />
-        
+
         <Text style={styles.title}>Suas Manutenções</Text>
 
+        <TextInput
+          style={styles.searchInput}
+          placeholder="Buscar manutenção..."
+          placeholderTextColor="#fff"
+          value={search}
+          onChangeText={setSearch}
+        />
+
         <FlatList
-          data={maintenances}
+          data={filteredMaintenances}
           keyExtractor={item => item.id}
           contentContainerStyle={{ gap: 12, paddingBottom: 100 }}
           ListEmptyComponent={
@@ -109,6 +129,7 @@ export default function MaintenanceList() {
                 router.push({
                   pathname: '/maintenance-details',
                   params: {
+                    id: item.id, // ✅ adicionado ID
                     title: item.title,
                     date: item.date,
                     km: item.mileage.toString(),
@@ -157,6 +178,13 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 22,
     fontWeight: 'bold',
+    color: '#fff',
+    marginBottom: 12,
+  },
+  searchInput: {
+    backgroundColor: 'rgba(255,255,255,0.2)',
+    borderRadius: 10,
+    padding: 10,
     color: '#fff',
     marginBottom: 16,
   },

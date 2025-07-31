@@ -1,8 +1,9 @@
-import { View, Text, StyleSheet, ScrollView, SafeAreaView } from 'react-native'
-import { useLocalSearchParams } from 'expo-router'
+import { View, Text, StyleSheet, ScrollView, SafeAreaView, Alert, TouchableOpacity } from 'react-native'
+import { useLocalSearchParams, useRouter } from 'expo-router'
 import { Ionicons } from '@expo/vector-icons'
 import { LinearGradient } from 'expo-linear-gradient'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import { supabase } from '@/lib/supabase'
 
 export const options = {
   headerShown: false,
@@ -15,7 +16,37 @@ function formatDateBR(dateString: string): string {
 
 export default function MaintenanceDetailsScreen() {
   const insets = useSafeAreaInsets()
-  const { title, date, km, description, location, cost } = useLocalSearchParams()
+  const router = useRouter()
+  const { title, date, km, description, location, cost, id } = useLocalSearchParams()
+
+function handleDelete() {
+  Alert.alert(
+    'Confirmar exclusão',
+    'Tem certeza que deseja excluir esta manutenção?',
+    [
+      { text: 'Cancelar', style: 'cancel' },
+      {
+        text: 'Excluir',
+        style: 'destructive',
+        onPress: async () => {
+          const { error } = await supabase
+            .from('maintenances')
+            .delete()
+            .eq('id', id as string)
+
+          if (error) {
+            Alert.alert('Erro', 'Não foi possível excluir a manutenção.')
+          } else {
+            Alert.alert('Sucesso', 'Manutenção excluída com sucesso.')
+            router.back()
+          }
+        },
+      },
+    ],
+    { cancelable: true }
+  )
+}
+
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: '#F9FAFB' }}>
@@ -37,6 +68,11 @@ export default function MaintenanceDetailsScreen() {
           <DetailRow icon="location" label="Local" value={location as string || 'N/A'} />
           <DetailRow icon="cash" label="Custo" value={cost ? `R$ ${cost}` : 'N/A'} />
         </View>
+
+        <TouchableOpacity style={styles.deleteButton} onPress={handleDelete}>
+          <Ionicons name="trash" size={20} color="#fff" style={{ marginRight: 8 }} />
+          <Text style={styles.deleteButtonText}>Excluir manutenção</Text>
+        </TouchableOpacity>
       </ScrollView>
     </SafeAreaView>
   )
@@ -56,7 +92,7 @@ function DetailRow({ icon, label, value }: { icon: any; label: string; value: st
 
 const styles = StyleSheet.create({
   scrollContainer: {
-    paddingBottom: 24,
+    paddingBottom: 40,
     backgroundColor: '#F9FAFB',
   },
   header: {
@@ -100,5 +136,20 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
     color: '#222',
+  },
+  deleteButton: {
+    marginTop: 32,
+    marginHorizontal: 20,
+    backgroundColor: '#FF3B30',
+    paddingVertical: 14,
+    borderRadius: 12,
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  deleteButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: '600',
   },
 })
