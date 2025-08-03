@@ -48,7 +48,7 @@ export default function CreateMaintenance() {
       Alert.alert('Erro ao salvar manutenção', error.message)
     } else {
       Alert.alert('Sucesso', 'Manutenção cadastrada com sucesso!')
-      router.replace('/') // volta pra home
+      router.replace('/') 
     }
   }
 
