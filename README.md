@@ -2,7 +2,7 @@
 # GearDash ⚙️
 
 GearDash is a mobile application built with React Native and Expo that helps users manage their vehicle maintenance records. It allows easy tracking, viewing, and organizing of past maintenance activities such as oil changes, tire replacements, and more.
-
+ 
 ---
  
 ## 📲 Features
